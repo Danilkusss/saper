@@ -1,17 +1,26 @@
-let size = document.querySelector("#Size");
-let CountBomb = document.querySelector("#matrixBomb")
+let width = document.querySelector(".with");
+let height = document.querySelector('.height')
+let CountBomb = document.querySelector('.bombs')
+let btn = document.querySelector('.begingame')
 let Points = document.querySelector(".points")
 
-size1w = 8
-size2h = 8
-CountBomb = 10
-StartGame(size1w, size2h, CountBomb)
+
+btn.addEventListener('click', function (){
+    size1w = width.value
+    size2h = height.value
+    CountBomb = CountBomb.value
+    StartGame(size1w, size2h, CountBomb)
+})
 
 function StartGame(size1w, size2h, CountBomb){
+    let cells = []
+    //console.log('game start')
     const field = document.querySelector(".table");
     const cellcount = size1w * size2h;
+    let closedCount = cellcount;
     field.innerHTML = '<button></button>'.repeat(cellcount)
-    const cells = [...field.children]; // получили детей поля
+    cells = [...field.children]; // получили детей поля;
+    console.log(cells)
 
     const bombs = [...Array(cellcount).keys()]
         .sort(() => Math.random() - 0.5)
@@ -28,7 +37,11 @@ function StartGame(size1w, size2h, CountBomb){
         open(row,column);
     });
 
+    function isValid(row,column){
+        return row >= 0 && row < size2h && column >= 0 && column < size1w;
+    }
 
+    // пролучение кол-во бомб и отрисовка для функции open
     function GetCountBomb(row,column){
         let count = 0;
         for (let x = -1; x <= 1; x++){
@@ -42,23 +55,53 @@ function StartGame(size1w, size2h, CountBomb){
     }
 
     function open(row, column){
+        if (!isValid(row,column)){
+            return;
+        }
+
         const index = row * size1w + column
         const cell = cells[index];
-        // проверка. если бомба то Х если нет то пустая строка
-        cell.innerHTML = isBomb(row, column) ? 'X' : GetCountBomb(row,column); 
-        cell.disabled = true;
 
+        if (cell.disabled === true){
+            return;
+        }
+
+        cell.disabled = true;
+        if (isBomb(row, column)){
+            // проверка. если бомба то Х если нет то пустая строка
+            cell.innerHTML = 'X'
+            alert("проиграл получается")
+            return;
+        }
+        closedCount--
+        if (closedCount <= CountBomb){
+            alert("победил получается")
+            return;
+        }
+        const count = GetCountBomb(row,column);
+
+        if (count !== 0){
+            cell.innerHTML = count
+            return;
+        }
+        for (let x = -1; x <= 1; x++){
+            for(let y = -1; y <= 1; y++){
+                open(row + y, column + x);
+            }
+        }
     }
 
 
-
+//это бомба?
     function isBomb(row, column){
+        if (!isValid(row,column)){
+            return false;
+        }
         const index = row * size1w + column;
         
         return bombs.includes(index);
     }
 }
 
-//https://www.youtube.com/watch?v=2z1ue0RINJE
 
 
